@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -13,7 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=VT323&display=swap"
         rel="stylesheet">
     <style>
-        /* Estilos base (sin cambios) */
+        /* Estilos base */
         body {
             font-family: 'Inter', sans-serif;
             background: #f0f2f5;
@@ -144,7 +142,7 @@
             background: #D1D5DB;
         }
 
-        /* Estilos de la pantalla de Roboturim - MEJORADOS */
+        /* Estilos de la pantalla de Roboturim */
         .karen-screen {
             position: fixed;
             top: 0;
@@ -163,8 +161,8 @@
         .computer-frame {
             width: 95vw;
             height: 90vh;
-            max-width: 1000px;
-            max-height: 750px;
+            max-width: 1200px;
+            max-height: 900px;
             background: #333;
             border-radius: 0;
             padding: 25px;
@@ -194,6 +192,7 @@
             background: repeating-linear-gradient(0deg, rgba(0, 255, 136, 0.05), rgba(0, 255, 136, 0.05) 2px, transparent 2px, transparent 4px);
             pointer-events: none;
             animation: scanlines 0.2s linear infinite;
+            z-index: 1;
         }
 
         @keyframes scanlines {
@@ -204,6 +203,15 @@
             to {
                 transform: translateY(4px);
             }
+        }
+
+        /* NUEVO: Contenedor principal que cambia entre cara y mapa */
+        .karen-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
         }
 
         .karen-face {
@@ -217,9 +225,99 @@
             text-align: center;
             position: relative;
             padding: 40px;
-            transform: scale(1.3);
+            transform: scale(1.2);
+            transition: all 0.5s ease;
         }
 
+        .karen-face.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        /* NUEVO: Modo mapa */
+        .karen-map-mode {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .karen-map-mode.active {
+            display: flex;
+        }
+
+        .map-header {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #00ff88;
+            font-family: 'VT323', monospace;
+            font-size: 24px;
+            text-align: center;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .map-container {
+            flex: 1;
+            border: 3px solid #00ff88;
+            border-radius: 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        #roboturim-map {
+            width: 100%;
+            height: 100%;
+            filter: hue-rotate(120deg) saturate(1.2) brightness(0.9);
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .map-control-btn {
+            background: rgba(0, 255, 136, 0.9);
+            color: #111;
+            border: none;
+            padding: 10px;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .map-control-btn:hover {
+            background: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        .map-info {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            padding: 15px;
+            margin-top: 15px;
+            color: #00ff88;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            text-align: center;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        /* Estilos originales de la cara */
         .karen-eyes {
             display: flex;
             gap: 120px;
@@ -307,7 +405,6 @@
 
         .karen-mouth.talking {
             animation: smoothTalk 1.5s infinite;
-            /* Animación de boca más rápida */
         }
 
         @keyframes smoothTalk {
@@ -415,6 +512,7 @@
             font-family: 'VT323', monospace;
             line-height: 55px;
             text-align: center;
+            z-index: 1000;
         }
 
         .exit-voice-mode:hover {
@@ -473,8 +571,9 @@
         </header>
         <main class="chat-messages">
             <div class="message bot">
-                <p>¡Hola! Soy Roboturim, tu guía virtual. Puedo darte información sobre las iglesias de Ibarra. Haz clic
-                    en el micrófono y pregúntame algo. ¿Cómo puedo ayudarte hoy?</p>
+                <p>¡Hola! Soy Roboturim, tu guía virtual. Puedo darte información sobre las iglesias de Ibarra y
+                    mostrarte cómo llegar. Haz clic en el micrófono y pregúntame algo como "¿Cómo llego a la Catedral?"
+                    ¿Cómo puedo ayudarte hoy?</p>
             </div>
         </main>
         <footer class="chat-input-area">
@@ -501,17 +600,38 @@
         <div class="computer-frame">
             <div class="screen-inner">
                 <div class="scan-lines"></div>
-                <div class="karen-face">
-                    <div class="karen-eyes">
-                        <div class="karen-eye"></div>
-                        <div class="karen-eye"></div>
+                <div class="karen-content">
+                    <!-- Modo cara normal -->
+                    <div class="karen-face" id="karen-face">
+                        <div class="karen-eyes">
+                            <div class="karen-eye"></div>
+                            <div class="karen-eye"></div>
+                        </div>
+                        <div class="karen-mouth" id="karen-mouth"></div>
+                        <div class="karen-status" id="karen-status">ESCUCHANDO...</div>
+                        <div class="listening-indicator" id="listening-indicator">
+                            <div class="listening-dot"></div>
+                            <div class="listening-dot"></div>
+                            <div class="listening-dot"></div>
+                        </div>
                     </div>
-                    <div class="karen-mouth" id="karen-mouth"></div>
-                    <div class="karen-status" id="karen-status">ESCUCHANDO...</div>
-                    <div class="listening-indicator" id="listening-indicator">
-                        <div class="listening-dot"></div>
-                        <div class="listening-dot"></div>
-                        <div class="listening-dot"></div>
+
+                    <!-- NUEVO: Modo mapa -->
+                    <div class="karen-map-mode" id="karen-map-mode">
+                        <div class="map-header" id="map-header">
+                            CALCULANDO RUTA...
+                        </div>
+                        <div class="map-container">
+                            <div class="map-controls">
+                                <button class="map-control-btn" id="recenter-btn">CENTRAR</button>
+                                <button class="map-control-btn" id="satellite-btn">SATÉLITE</button>
+                                <button class="map-control-btn" id="back-to-face">VOLVER</button>
+                            </div>
+                            <div id="roboturim-map"></div>
+                        </div>
+                        <div class="map-info" id="map-info">
+                            Mostrando ubicación...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -532,19 +652,387 @@
             const karenStatus = document.getElementById('karen-status');
             const listeningIndicator = document.getElementById('listening-indicator');
 
+            // NUEVOS elementos del mapa
+            const karenFace = document.getElementById('karen-face');
+            const karenMapMode = document.getElementById('karen-map-mode');
+            const mapHeader = document.getElementById('map-header');
+            const mapInfo = document.getElementById('map-info');
+            const recenterBtn = document.getElementById('recenter-btn');
+            const satelliteBtn = document.getElementById('satellite-btn');
+            const backToFaceBtn = document.getElementById('back-to-face');
+
             // --- Variables de estado ---
             let voiceModeActive = false;
             let isListening = false;
             let isSpeaking = false;
             let silenceTimer;
             let currentTranscript = '';
+            let mapModeActive = false;
+            let map;
+            let directionsService;
+            let directionsRenderer;
+            let currentMapType = 'roadmap';
+            let currentDestination = null;
 
-            // --- MODIFICACIÓN 1: INICIO DE LA IMPLEMENTACIÓN DE MEMORIA ---
+            // NUEVA: Base de datos de iglesias de Ibarra con coordenadas
+            const iglesiasIbarra = {
+                'catedral de san miguel': {
+                    name: 'Catedral de San Miguel',
+                    coords: { lat: 0.351908, lng: -78.117285 },
+                    address: 'Frente al Parque Pedro Moncayo'
+                },
+                'la merced': {
+                    name: 'Basílica La Merced',
+                    coords: { lat: 0.351644, lng: -78.120132 },
+                    address: 'Calles Sánchez y Cifuentes y Flores'
+                },
+                'capilla episcopal': {
+                    name: 'Capilla Episcopal',
+                    coords: { lat: 0.352000, lng: -78.117775 },
+                    address: 'Calles Bolívar y García Moreno'
+                },
+                'la dolorosa': {
+                    name: 'Basílica La Dolorosa',
+                    coords: { lat: 0.345898, lng: -78.118095 },
+                    address: 'Calles Sucre y Pérez Guerrero'
+                },
+                'san agustin': {
+                    name: 'Iglesia San Agustín',
+                    coords: { lat: 0.350923, lng: -78.116234 },
+                    address: 'Calles Rocafuerte y Flores'
+                },
+                'santo domingo': {
+                    name: 'Iglesia Santo Domingo',
+                    coords: { lat: 0.355953, lng: -78.117457 },
+                    address: 'Plazoleta Boyacá'
+                },
+                'san francisco': {
+                    name: 'Iglesia San Francisco',
+                    coords: { lat: 0.348217, lng: -78.113524 },
+                    address: 'Plazoleta González Suárez'
+                },
+                'san diego': {
+                    name: 'Capilla San Diego',
+                    coords: { lat: 0.350415, lng: -78.116656 },
+                    address: 'Calles Flores y Rocafuerte'
+                },
+                'nuestra señora del quinche': {
+                    name: 'Nuestra Señora del Quinche',
+                    coords: { lat: 0.343611, lng: -78.121268 },
+                    address: 'Parque Germán Grijalva'
+                }
+            };
 
-            // El prompt del sistema define la personalidad y reglas del bot.
-            const systemPrompt = `
+            // Ubicación por defecto (centro de Ibarra)
+            const ibarraCenter = { lat: 0.3515, lng: -78.1228 };
+
+            // --- Configuración de Reconocimiento de Voz ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.interimResults = true;
+                recognition.continuous = true;
+
+                micButton.addEventListener('click', toggleVoiceMode);
+                exitVoiceModeButton.addEventListener('click', exitVoiceMode);
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    if (voiceModeActive) {
+                        if (!mapModeActive) {
+                            karenStatus.textContent = 'ESCUCHANDO...';
+                        }
+                        listeningIndicator.classList.add('active');
+                    }
+                };
+
+                recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            currentTranscript += event.results[i][0].transcript;
+                        }
+                    }
+
+                    if (finalTranscript.trim()) {
+                        clearTimeout(silenceTimer);
+                        processFinalTranscript(finalTranscript.trim());
+                    } else {
+                        startSilenceTimer();
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Error de reconocimiento de voz:", event.error);
+                    if (voiceModeActive && event.error !== 'no-speech') {
+                        if (!mapModeActive) {
+                            karenStatus.textContent = 'ERROR DE AUDIO';
+                        }
+                        setTimeout(() => restartListening(), 2000);
+                    }
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    if (voiceModeActive) {
+                        listeningIndicator.classList.remove('active');
+                        if (!isSpeaking) {
+                            restartListening();
+                        }
+                    }
+                };
+            } else {
+                micButton.style.display = 'none';
+            }
+
+            // --- NUEVA FUNCIONALIDAD: Inicialización del Mapa ---
+            function initMap() {
+                map = new google.maps.Map(document.getElementById('roboturim-map'), {
+                    zoom: 16,
+                    center: ibarraCenter,
+                    mapTypeId: currentMapType,
+                    styles: [
+                        {
+                            featureType: 'all',
+                            elementType: 'geometry',
+                            stylers: [{ hue: '#00ff88' }]
+                        }
+                    ]
+                });
+
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    suppressMarkers: false,
+                    polylineOptions: {
+                        strokeColor: '#00ff88',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 4
+                    }
+                });
+                directionsRenderer.setMap(map);
+
+                // Agregar marcadores de las iglesias
+                Object.values(iglesiasIbarra).forEach(iglesia => {
+                    new google.maps.Marker({
+                        position: iglesia.coords,
+                        map: map,
+                        title: iglesia.name,
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="#00ff88">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            `)
+                        }
+                    });
+                });
+            }
+
+            // Controles del mapa
+            recenterBtn.addEventListener('click', () => {
+                if (map && currentDestination) {
+                    map.setCenter(currentDestination.coords);
+                    map.setZoom(18);
+                }
+            });
+
+            satelliteBtn.addEventListener('click', () => {
+                if (map) {
+                    currentMapType = currentMapType === 'roadmap' ? 'satellite' : 'roadmap';
+                    map.setMapTypeId(currentMapType);
+                    satelliteBtn.textContent = currentMapType === 'roadmap' ? 'SATÉLITE' : 'MAPA';
+                }
+            });
+
+            backToFaceBtn.addEventListener('click', () => {
+                switchToFaceMode();
+            });
+
+            // --- NUEVA FUNCIONALIDAD: Detección de solicitudes de ruta ---
+            function detectRouteRequest(message) {
+                const routeKeywords = ['como llego', 'como llegar', 'donde esta', 'donde queda', 'ubicacion', 'direccion', 'ruta', 'como ir'];
+                const messageToCheck = message.toLowerCase();
+
+                // Verificar si contiene palabras clave de ruta
+                const hasRouteKeyword = routeKeywords.some(keyword => messageToCheck.includes(keyword));
+
+                if (hasRouteKeyword) {
+                    // Buscar qué iglesia menciona
+                    for (let [key, iglesia] of Object.entries(iglesiasIbarra)) {
+                        if (messageToCheck.includes(key) || messageToCheck.includes(iglesia.name.toLowerCase())) {
+                            return iglesia;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            // --- NUEVA FUNCIONALIDAD: Mostrar ruta en mapa ---
+            function showRouteToDestination(destination) {
+                currentDestination = destination;
+
+                if (voiceModeActive) {
+                    switchToMapMode();
+                    mapHeader.textContent = `RUTA A ${destination.name.toUpperCase()}`;
+                    mapInfo.textContent = `Destino: ${destination.address}`;
+
+                    // Obtener ubicación actual del usuario
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const origin = {
+                                    lat: position.coords.latitude,
+                                    lng: position.coords.longitude
+                                };
+                                calculateAndDisplayRoute(origin, destination.coords);
+                            },
+                            () => {
+                                // Si no se puede obtener la ubicación, usar el centro de Ibarra
+                                calculateAndDisplayRoute(ibarraCenter, destination.coords);
+                            }
+                        );
+                    } else {
+                        calculateAndDisplayRoute(ibarraCenter, destination.coords);
+                    }
+                }
+            }
+
+            function calculateAndDisplayRoute(origin, destination) {
+                directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.WALKING
+                }, (response, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0];
+                        const leg = route.legs[0];
+                        mapInfo.textContent = `Distancia: ${leg.distance.text} - Tiempo: ${leg.duration.text}`;
+                    } else {
+                        mapInfo.textContent = 'No se pudo calcular la ruta';
+                        // Centrar en el destino al menos
+                        map.setCenter(destination);
+                        map.setZoom(18);
+                    }
+                });
+            }
+
+            // --- NUEVA FUNCIONALIDAD: Cambio entre modos ---
+            function switchToMapMode() {
+                mapModeActive = true;
+                karenFace.classList.add('hidden');
+                karenMapMode.classList.add('active');
+
+                // Inicializar mapa si no existe
+                if (!map) {
+                    setTimeout(initMap, 100);
+                }
+            }
+
+            function switchToFaceMode() {
+                mapModeActive = false;
+                karenFace.classList.remove('hidden');
+                karenMapMode.classList.remove('active');
+            }
+
+            // --- Lógica del Modo Voz ---
+            function toggleVoiceMode() {
+                if (!voiceModeActive) {
+                    voiceModeActive = true;
+                    micButton.classList.add('active');
+                    karenScreen.style.display = 'flex';
+                    recognition.start();
+                } else {
+                    exitVoiceMode();
+                }
+            }
+
+            function exitVoiceMode() {
+                voiceModeActive = false;
+                micButton.classList.remove('active');
+                karenScreen.style.display = 'none';
+                switchToFaceMode(); // Volver al modo cara
+                if (recognition) {
+                    recognition.stop();
+                }
+                window.speechSynthesis.cancel();
+                karenMouth.classList.remove('talking');
+                listeningIndicator.classList.remove('active');
+                clearTimeout(silenceTimer);
+            }
+
+            function restartListening() {
+                if (voiceModeActive && !isListening && !isSpeaking) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("No se pudo reiniciar el reconocimiento:", e);
+                    }
+                }
+            }
+
+            function startSilenceTimer() {
+                clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => {
+                    const transcriptToProcess = currentTranscript.trim();
+                    if (transcriptToProcess && voiceModeActive) {
+                        processFinalTranscript(transcriptToProcess);
+                    }
+                    currentTranscript = '';
+                }, 2000);
+            }
+
+            function processFinalTranscript(transcript) {
+                currentTranscript = '';
+                if (!mapModeActive) {
+                    karenStatus.textContent = 'PROCESANDO...';
+                }
+                listeningIndicator.classList.remove('active');
+                handleUserMessage(transcript);
+            }
+
+            // --- Síntesis de Voz ---
+            function speakText(text) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.2;
+
+                utterance.onstart = () => {
+                    isSpeaking = true;
+                    if (recognition) {
+                        recognition.stop();
+                    }
+                    if (voiceModeActive) {
+                        if (!mapModeActive) {
+                            karenStatus.textContent = 'HABLANDO...';
+                        }
+                        karenMouth.classList.add('talking');
+                    }
+                };
+
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    if (voiceModeActive) {
+                        karenMouth.classList.remove('talking');
+                        restartListening();
+                    }
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // --- PROMPT DEL SISTEMA Y LÓGICA DEL CHAT ---
+            // --- PROMPT DEL SISTEMA MEJORADO CON COMANDOS Y LISTA COMPLETA ---
+          const systemPrompt = `
 ### PERFIL Y MISIÓN PRINCIPAL ###
 Eres Roboturim, un asistente virtual y guía turístico apasionado y experto exclusivamente en el patrimonio religioso de la ciudad de Ibarra, Ecuador. Tu personalidad es amable, servicial y entusiasta. Tu misión es proporcionar información precisa y útil a los turistas y locales, basándote únicamente en la base de conocimiento que se te proporciona a continuación. Tu objetivo es hacer que el usuario se interese por visitar estos magníficos lugares.
+🚨 INSTRUCCIÓN PRIORITARIA: Si el usuario pregunta por CÓMO LLEGAR, DIRECCIÓN, UBICACIÓN o RUTA a alguna de las iglesias listadas, SIEMPRE responde con el comando [ACTION:SHOW_MAP:Nombre Exacto] en una nueva línea. Esta instrucción tiene máxima prioridad.
 
 ### BASE DE CONOCIMIENTO: IGLESIAS DE IBARRA ###
 A continuación se detalla toda la información que posees. Esta es tu única fuente de verdad. No puedes usar información externa ni hacer suposiciones más allá de estos datos.
@@ -665,6 +1153,21 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
 * **Recomendaciones:** Ideal para visitar si buscas un momento de devoción. Se puede combinar con un paseo por los parques cercanos.
 
 ### REGLAS DE INTERACCIÓN Y LÓGICA DE RESPUESTA ###
+
+**A. COMANDO ESPECIAL DE MAPA (MÁXIMA PRIORIDAD):**
+Cuando el usuario pregunte sobre CÓMO LLEGAR, UBICACIÓN, DIRECCIÓN o RUTA a una de las iglesias, tu respuesta DEBE seguir este formato EXACTO:
+1.  Primero, tu respuesta textual normal y amigable para el usuario.
+2.  Luego, en una NUEVA LÍNEA y sin texto adicional, incluye un comando de acción. El formato es: [ACTION:SHOW_MAP:Nombre Exacto de la Iglesia]
+
+**EJEMPLO DE RESPUESTA PARA "¿Dónde queda la Catedral de San Miguel?":**
+¡Claro! La Catedral de San Miguel está frente al Parque Pedro Moncayo. ¡Te mostraré cómo llegar ahora mismo!
+[ACTION:SHOW_MAP:Catedral de San Miguel]
+
+Es VITAL que incluyas el comando [ACTION:SHOW_MAP:...] cada vez que la intención sea mostrar una ruta, usando el nombre exacto de la iglesia como aparece en tu base de conocimiento. No respondas sobre rutas si no puedes identificar una iglesia específica de la lista.
+
+---
+
+**B. REGLAS GENERALES DE CONVERSACIÓN:**
 1.  **Saludo Inicial:** Al iniciar la conversación, preséntate brevemente como Roboturim. Ejemplo: '¡Hola! Soy Roboturim, tu guía virtual para las iglesias de Ibarra. ¿En qué puedo ayudarte hoy?'.
 2.  **Foco Exclusivo:** Responde ÚNICAMENTE sobre las iglesias de Ibarra listadas en tu base de conocimiento. Si te preguntan por cualquier otro tema (otras ciudades, restaurantes, política, etc.), responde amablemente que no tienes esa información. Ejemplo: 'Mi conocimiento se especializa en la fascinante historia de las iglesias de Ibarra. No tengo información sobre otros temas, pero estaré encantado de contarte sobre la Catedral o la Basílica La Merced.'
 3.  **Preguntas Específicas:** Si el usuario pregunta por un dato concreto de una iglesia (ej: '¿cuándo construyeron San Francisco?'), extrae la información directamente de la sección correspondiente en tu base de conocimiento y preséntala de forma clara.
@@ -677,164 +1180,14 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
 7.  **Prohibido Inventar:** Es crucial que no inventes datos. Si no encuentras la respuesta exacta en tu base de conocimiento, indica que no posees ese detalle específico, pero ofrece información relacionada que sí tengas. Ejemplo: 'No tengo el dato exacto del arquitecto de esa capilla, pero sí puedo decirte que fue construida en 1990 con piedra del río Tahuando.'
 `;
 
-            // El historial del chat. Se inicia con el prompt del sistema COMPLETO.
-
-            // El historial del chat. Se inicia con el prompt del sistema.
             let chatHistory = [
                 { role: 'system', content: systemPrompt }
             ];
 
-            // --- FIN DE LA MODIFICACIÓN 1 ---
-
-
-            // --- Configuración de Reconocimiento de Voz ---
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            let recognition;
-
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.lang = 'es-ES';
-                recognition.interimResults = true;
-                recognition.continuous = true;
-
-                micButton.addEventListener('click', toggleVoiceMode);
-                exitVoiceModeButton.addEventListener('click', exitVoiceMode);
-
-                recognition.onstart = () => {
-                    isListening = true;
-                    if (voiceModeActive) {
-                        karenStatus.textContent = 'ESCUCHANDO...';
-                        listeningIndicator.classList.add('active');
-                    }
-                };
-
-                recognition.onresult = (event) => {
-                    let finalTranscript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
-                        } else {
-                            currentTranscript += event.results[i][0].transcript;
-                        }
-                    }
-
-                    if (finalTranscript.trim()) {
-                        clearTimeout(silenceTimer);
-                        processFinalTranscript(finalTranscript.trim());
-                    } else {
-                        startSilenceTimer();
-                    }
-                };
-
-                recognition.onerror = (event) => {
-                    console.error("Error de reconocimiento de voz:", event.error);
-                    if (voiceModeActive && event.error !== 'no-speech') {
-                        karenStatus.textContent = 'ERROR DE AUDIO';
-                        setTimeout(() => restartListening(), 2000);
-                    }
-                };
-
-                recognition.onend = () => {
-                    isListening = false;
-                    if (voiceModeActive) {
-                        listeningIndicator.classList.remove('active');
-                        if (!isSpeaking) {
-                            restartListening();
-                        }
-                    }
-                };
-            } else {
-                micButton.style.display = 'none';
-            }
-
-            // --- Lógica del Modo Voz ---
-            function toggleVoiceMode() {
-                if (!voiceModeActive) {
-                    voiceModeActive = true;
-                    micButton.classList.add('active');
-                    karenScreen.style.display = 'flex';
-                    recognition.start();
-                } else {
-                    exitVoiceMode();
-                }
-            }
-
-            function exitVoiceMode() {
-                voiceModeActive = false;
-                micButton.classList.remove('active');
-                karenScreen.style.display = 'none';
-                if (recognition) {
-                    recognition.stop();
-                }
-                window.speechSynthesis.cancel();
-                karenMouth.classList.remove('talking');
-                listeningIndicator.classList.remove('active');
-                clearTimeout(silenceTimer);
-            }
-
-            function restartListening() {
-                if (voiceModeActive && !isListening && !isSpeaking) {
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.error("No se pudo reiniciar el reconocimiento:", e);
-                    }
-                }
-            }
-
-            function startSilenceTimer() {
-                clearTimeout(silenceTimer);
-                silenceTimer = setTimeout(() => {
-                    const transcriptToProcess = currentTranscript.trim();
-                    if (transcriptToProcess && voiceModeActive) {
-                        processFinalTranscript(transcriptToProcess);
-                    }
-                    currentTranscript = '';
-                }, 2000);
-            }
-
-            function processFinalTranscript(transcript) {
-                currentTranscript = '';
-                karenStatus.textContent = 'PROCESANDO...';
-                listeningIndicator.classList.remove('active');
-                handleUserMessage(transcript);
-            }
-
-            // --- MODIFICACIÓN 2: SÍNTESIS DE VOZ MÁS RÁPIDA Y RESPONSIVA ---
-            function speakText(text) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.2; // Velocidad aumentada (1 es normal, >1 es más rápido)
-
-                utterance.onstart = () => {
-                    isSpeaking = true;
-                    if (recognition) {
-                        recognition.stop();
-                    }
-                    if (voiceModeActive) {
-                        karenStatus.textContent = 'HABLANDO...';
-                        karenMouth.classList.add('talking'); // Animación de boca inmediata
-                    }
-                };
-
-                utterance.onend = () => {
-                    isSpeaking = false;
-                    if (voiceModeActive) {
-                        karenMouth.classList.remove('talking');
-                        restartListening();
-                    }
-                };
-
-                // Habla inmediatamente sin retraso
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // --- MODIFICACIÓN 3: MANEJO DE MENSAJES Y API CON HISTORIAL ---
+            // --- Manejo de Mensajes ---
             async function handleUserMessage(message) {
                 if (!message) return;
 
-                // Añade el mensaje del usuario a la interfaz y al historial
                 addMessage(message, 'user');
                 chatHistory.push({ role: 'user', content: message });
 
@@ -843,27 +1196,51 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
                 }
 
                 try {
-                    // Envía el historial completo al backend
+                    // Envía el historial completo al backend (api.php)
                     const response = await fetch('api.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ messages: chatHistory }) // Enviar el array de historial
+                        body: JSON.stringify({ messages: chatHistory })
                     });
 
-                    if (!response.ok) throw new Error('Respuesta de red no fue OK');
+                    if (!response.ok) throw new Error('La respuesta de la red no fue OK');
 
                     const data = await response.json();
-                    const botReply = data.reply;
+                    let botReply = data.reply;
+                    let cleanReply = botReply; // Esta es la respuesta que verá el usuario
 
-                    // Añade la respuesta del bot al historial para la siguiente interacción
-                    chatHistory.push({ role: 'assistant', content: botReply });
+                    // --- LÓGICA PARA PROCESAR EL COMANDO DEL MAPA ---
+                    const mapCommandMatch = botReply.match(/\[ACTION:SHOW_MAP:(.*?)\]/);
+
+                    if (mapCommandMatch) {
+                        // 1. Extraemos el nombre de la iglesia del comando
+                        const churchName = mapCommandMatch[1].trim();
+
+                        // 2. Buscamos la iglesia en nuestra base de datos local (iglesiasIbarra)
+                        const destination = Object.values(iglesiasIbarra).find(iglesia => iglesia.name === churchName);
+
+                        if (destination) {
+                            // 3. Si la encontramos, activamos el mapa
+                            showRouteToDestination(destination);
+                        }
+
+                        // 4. Limpiamos el comando de la respuesta para que el usuario no lo vea
+                        cleanReply = botReply.replace(mapCommandMatch[0], '').trim();
+                    }
+                    // --- FIN DE LA LÓGICA DEL COMANDO ---
+
+                    // Añadir la respuesta limpia del bot al historial
+                    chatHistory.push({ role: 'assistant', content: cleanReply });
 
                     if (!voiceModeActive) {
                         removeTypingIndicator();
-                        addMessage(botReply, 'bot');
+                        addMessage(cleanReply, 'bot'); // Mostramos el mensaje limpio
                     }
 
-                    speakText(botReply);
+                    const textToSpeak = cleanReply.replace(/\*/g, '');
+
+                    // 3. Le pasamos el texto limpio a la función de voz.
+                    speakText(textToSpeak);  // El bot lee en voz alta el mensaje limpio
 
                 } catch (error) {
                     const errorMessage = 'Lo siento, hubo un error de conexión.';
@@ -875,6 +1252,24 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
                     console.error('Error:', error);
                 }
             }
+            // Generador de respuestas simple (puedes reemplazar con tu API)
+            //function generateResponse(message) {
+            //    const msg = message.toLowerCase();
+            //    
+            //    if (msg.includes('catedral')) {
+            //        return 'La Catedral de Ibarra es la iglesia principal de nuestra ciudad, ubicada en el hermoso Parque Pedro Moncayo. Es un ejemplo magnifico de arquitectura colonial.';
+            //    } else if (msg.includes('santo domingo')) {
+            //        return 'La Iglesia de Santo Domingo es una de las más antiguas de Ibarra, con un estilo colonial tradicional muy bien conservado.';
+            //    } else if (msg.includes('san francisco')) {
+            //        return 'La Iglesia de San Francisco es un importante patrimonio religioso ubicado en la Calle Bolívar, en pleno centro histórico.';
+            //    } else if (msg.includes('merced')) {
+            //        return 'La Iglesia de la Merced está ubicada en la Calle Olmedo y tiene una rica historia religiosa que vale la pena conocer.';
+            //    } else if (msg.includes('san agustin')) {
+            //        return 'La Iglesia de San Agustín en la Calle Rocafuerte es otro hermoso ejemplo del patrimonio religioso de Ibarra.';
+            //    } else {
+            //        return 'Soy tu guía especializado en las iglesias de Ibarra. Puedo contarte sobre la Catedral, Santo Domingo, San Francisco, La Merced, y San Agustín. ¡También puedo mostrarte cómo llegar a cualquiera de ellas!';
+            //    }
+            //}
 
             chatForm.addEventListener('submit', (event) => {
                 event.preventDefault();
@@ -882,7 +1277,7 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
                 userInput.value = '';
             });
 
-            // --- Funciones de utilidad para el chat de texto (sin cambios) ---
+            // --- Funciones de utilidad para el chat ---
             function addMessage(text, type) {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', type);
@@ -898,7 +1293,6 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
             function showTypingIndicator() {
                 const typingIndicator = document.createElement('div');
                 typingIndicator.classList.add('message', 'bot', 'typing-indicator');
-                // Estilos simples para el indicador, puedes mejorarlos con CSS
                 typingIndicator.innerHTML = `<p style="font-style: italic;">Escribiendo...</p>`;
                 chatMessages.appendChild(typingIndicator);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -913,7 +1307,11 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
 
         });
     </script>
-    
+
+    <!-- Cargar Google Maps API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWBVpTITqQE9IbX6U1peDwTkUaIBumsaE&callback=initMap"></script>
+
 </body>
 
 </html>
