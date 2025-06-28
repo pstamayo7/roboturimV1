@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 // ¡MUY IMPORTANTE! NO PONGAS TU API KEY DIRECTAMENTE AQUÍ EN UN PROYECTO REAL.
 // Usa variables de entorno para máxima seguridad.
-$apiKey = 'AIzaSyCrxVdEDPm8YtTUlQz6GUenDf-VDdrwDSI'; // <-- ¡REEMPLAZA ESTO CON TU API KEY REAL!
+$apiKey = 'AIzaSyCE8VlW6Ry9v0-cFoxXnkYDZLtWjwGovXw'; // <-- ¡REEMPLAZA ESTO CON TU API KEY REAL!
 
 // --- MODIFICACIÓN 1: LEER EL HISTORIAL DE CHAT COMPLETO ---
 // En lugar de leer una sola 'question', ahora leemos el array 'messages'.

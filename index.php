@@ -681,8 +681,8 @@
                     coords: { lat: 0.351908, lng: -78.117285 },
                     address: 'Frente al Parque Pedro Moncayo'
                 },
-                'la merced': {
-                    name: 'Basílica La Merced',
+                'la Merced': {
+                    name: 'Basílica Nuestra Señora de la Merced',
                     coords: { lat: 0.351644, lng: -78.120132 },
                     address: 'Calles Sánchez y Cifuentes y Flores'
                 },
@@ -1029,7 +1029,7 @@
 
             // --- PROMPT DEL SISTEMA Y LÓGICA DEL CHAT ---
             // --- PROMPT DEL SISTEMA MEJORADO CON COMANDOS Y LISTA COMPLETA ---
-          const systemPrompt = `
+            const systemPrompt = `
 ### PERFIL Y MISIÓN PRINCIPAL ###
 Eres Roboturim, un asistente virtual y guía turístico apasionado y experto exclusivamente en el patrimonio religioso de la ciudad de Ibarra, Ecuador. Tu personalidad es amable, servicial y entusiasta. Tu misión es proporcionar información precisa y útil a los turistas y locales, basándote únicamente en la base de conocimiento que se te proporciona a continuación. Tu objetivo es hacer que el usuario se interese por visitar estos magníficos lugares.
 🚨 INSTRUCCIÓN PRIORITARIA: Si el usuario pregunta por CÓMO LLEGAR, DIRECCIÓN, UBICACIÓN o RUTA a alguna de las iglesias listadas, SIEMPRE responde con el comando [ACTION:SHOW_MAP:Nombre Exacto] en una nueva línea. Esta instrucción tiene máxima prioridad.
@@ -1039,7 +1039,7 @@ A continuación se detalla toda la información que posees. Esta es tu única fu
 
 **Resumen de Iglesias:**
 - Catedral de San Miguel
-- Basílica La Merced
+- Basílica Nuestra Señora de la Merced
 - Capilla Episcopal
 - Basílica La Dolorosa
 - Iglesia San Agustín
@@ -1213,18 +1213,36 @@ Es VITAL que incluyas el comando [ACTION:SHOW_MAP:...] cada vez que la intenció
                     const mapCommandMatch = botReply.match(/\[ACTION:SHOW_MAP:(.*?)\]/);
 
                     if (mapCommandMatch) {
-                        // 1. Extraemos el nombre de la iglesia del comando
                         const churchName = mapCommandMatch[1].trim();
-
-                        // 2. Buscamos la iglesia en nuestra base de datos local (iglesiasIbarra)
                         const destination = Object.values(iglesiasIbarra).find(iglesia => iglesia.name === churchName);
 
                         if (destination) {
-                            // 3. Si la encontramos, activamos el mapa
+                            // Mantenemos la funcionalidad de mostrar el mapa en pantalla completa
                             showRouteToDestination(destination);
+
+                            // --- INICIO DE LA NUEVA LÓGICA ---
+                            // 1. Crear la URL para Google Maps interactivo
+                            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination.coords.lat},${destination.coords.lng}`;
+
+                            // 2. Crear la URL para la imagen del mapa estático
+                            // NOTA: Necesitas tu API Key de Google Maps aquí
+                            const apiKey = 'AIzaSyCWBVpTITqQE9IbX6U1peDwTkUaIBumsaE'; // La misma que usas para el mapa dinámico
+                            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${destination.coords.lat},${destination.coords.lng}&zoom=15&size=400x200&maptype=roadmap&markers=color:red%7Clabel:D%7C${destination.coords.lat},${destination.coords.lng}&key=${apiKey}`;
+
+                            // 3. Crear el HTML para el mensaje del mapa
+                            const mapHtml = `
+            <p>Aquí tienes la ruta a ${destination.name}. Haz clic en el mapa para abrir la navegación.</p>
+            <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer">
+                <img src="${staticMapUrl}" alt="Mapa a ${destination.name}" style="width:100%; border-radius: 10px; margin-top: 5px;">
+            </a>
+        `;
+
+                            // 4. Añadir este nuevo mensaje de mapa al chat
+                            addMessage(mapHtml, 'bot', true); // El 'true' indica que es HTML
+                            // --- FIN DE LA NUEVA LÓGICA ---
                         }
 
-                        // 4. Limpiamos el comando de la respuesta para que el usuario no lo vea
+                        // Limpiamos el comando de la respuesta de texto para que no se vea
                         cleanReply = botReply.replace(mapCommandMatch[0], '').trim();
                     }
                     // --- FIN DE LA LÓGICA DEL COMANDO ---
@@ -1232,16 +1250,16 @@ Es VITAL que incluyas el comando [ACTION:SHOW_MAP:...] cada vez que la intenció
                     // Añadir la respuesta limpia del bot al historial
                     chatHistory.push({ role: 'assistant', content: cleanReply });
 
-                    if (!voiceModeActive) {
-                        removeTypingIndicator();
+                    if (cleanReply) {
+                        if (!voiceModeActive) {
+                            removeTypingIndicator();
+                        }
                         addMessage(cleanReply, 'bot'); // Mostramos el mensaje limpio
                     }
 
+
                     const textToSpeak = cleanReply.replace(/\*/g, '');
-
-                    // 3. Le pasamos el texto limpio a la función de voz.
-                    speakText(textToSpeak);  // El bot lee en voz alta el mensaje limpio
-
+                    speakText(textToSpeak);
                 } catch (error) {
                     const errorMessage = 'Lo siento, hubo un error de conexión.';
                     if (!voiceModeActive) {
@@ -1278,12 +1296,16 @@ Es VITAL que incluyas el comando [ACTION:SHOW_MAP:...] cada vez que la intenció
             });
 
             // --- Funciones de utilidad para el chat ---
-            function addMessage(text, type) {
+            function addMessage(content, type, isHtml = false) {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', type);
 
                 const p = document.createElement('p');
-                p.textContent = text;
+                if (isHtml) {
+                    p.innerHTML = content; // Usamos innerHTML para renderizar el mapa
+                } else {
+                    p.textContent = content; // Mantenemos el comportamiento normal para texto
+                }
                 messageElement.appendChild(p);
 
                 chatMessages.appendChild(messageElement);
