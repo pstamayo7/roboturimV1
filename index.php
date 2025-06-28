@@ -1258,15 +1258,19 @@ Es VITAL que incluyas el comando [ACTION:SHOW_MAP:...] cada vez que la intenció
                     }
 
 
-                    const textToSpeak = cleanReply.replace(/\*/g, '');
-                    speakText(textToSpeak);
+                    if (voiceModeActive) {
+                        const textToSpeak = cleanReply.replace(/\*/g, '');
+                        speakText(textToSpeak);
+                    }
                 } catch (error) {
                     const errorMessage = 'Lo siento, hubo un error de conexión.';
                     if (!voiceModeActive) {
                         removeTypingIndicator();
                         addMessage(errorMessage, 'bot');
                     }
-                    speakText(errorMessage);
+                    if (voiceModeActive) {
+                        speakText(errorMessage);
+                    }
                     console.error('Error:', error);
                 }
             }
